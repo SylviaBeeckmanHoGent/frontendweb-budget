@@ -13,4 +13,11 @@ const TRANSACTION_DATA = [
   },
 ];
 
-export default TRANSACTION_DATA;
+const PLACE_DATA = [
+  { id: 1, name: 'home', rating: 5 },
+  { id: 4, name: 'hogent', rating: 1 },
+  { id: 7, name: 'bar', rating: 3 },
+];
+
+export { TRANSACTION_DATA, PLACE_DATA }; // export the data
+// je kan ook voor de const export zetten
