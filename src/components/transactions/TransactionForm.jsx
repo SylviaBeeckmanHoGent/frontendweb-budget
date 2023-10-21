@@ -2,6 +2,7 @@ import { useState, memo } from 'react';
 import { PLACE_DATA } from '../../api/mock_data';
 import { useForm } from 'react-hook-form';
 
+//onderstaand is een pure functie > geeft altijd dezelfde output voor dezelfde input; heeft niks nodig die van ergens anders komt
 const toDateInputString = (date) => {
   // ISO String without the trailing 'Z' is fine 🙄
   // (toISOString returns something like 2020-12-05T14:15:74Z,
@@ -16,6 +17,15 @@ const toDateInputString = (date) => {
   return asString.substring(0, asString.indexOf('T'));
 };
 
+const validationRules = {
+  user: {
+    required: 'User is required', //string weergeven als het veld niet is ingevuld
+    minLength: { value: 2, message: 'Min length is 2' }, //minLength verwacht een object > value = aantal tekens, message = string die weergegeven wordt indien niet in orde
+  },
+  date: { valueAsDate: true },
+  amount: { valueAsNumber: true },
+};
+
 export default memo(function TransactionForm({ onSaveTransaction }) {
   // //dit zijn onze statevariabelen voor onze veldjes
   // //de useStates hebben allemaal een startwaarde
@@ -24,7 +34,7 @@ export default memo(function TransactionForm({ onSaveTransaction }) {
   // const [date, setDate] = useState(new Date()); //statevariabele date; defaultwaarde is huidige datum
   // const [place, setPlace] = useState('home'); //statevariabele place; defaultwaarde is 'home'
   // const [amount, setAmount] = useState(0); //statevariabele amount; defaultwaarde is 0
-  
+
   //bovenstaande doen we weg en we gebruike nu useForm()
   const {
     register, //nieuw  inputveld registreren
@@ -81,10 +91,7 @@ export default memo(function TransactionForm({ onSaveTransaction }) {
             // value={user} //de waarde moet gelijk zijn aan de statevariabele
             // onChange={(e) => setUser(e.target.value)} //als er iets wijzigt, roepen we de setter aan > target (hier input) wordt ingesteld met de ingetypte waarde
             defaultValue=''
-            {...register('user', {
-              required: 'User is required', //string weergeven als het veld niet is ingevuld
-              minLength: { value: 2, message: 'Min length is 2'}, //minLength verwacht een object > value = aantal tekens, message = string die weergegeven wordt indien niet in orde
-            })} //vangt de onChange en de value op
+            {...register('user', validationRules.user)} //register vangt de onChange en de value op; validationRules is een object en kan dus nooit wijzigen > dus nooit problemen
           />
           {errors.user && <p className='form-text text-danger'>{errors.user.message}</p>}
         </div>
@@ -101,7 +108,7 @@ export default memo(function TransactionForm({ onSaveTransaction }) {
             // value={toDateInputString(date)}
             // onChange={(e) => setDate(new Date(e.target.value))} // e.target.value is een string, maar we willen een Date object > dus new Date()
             defaultValue={toDateInputString(new Date())}
-            {...register('date', {valueAsDate: true})}
+            {...register('date', validationRules.date)}
           />
         </div>
         <div className='mb-3'>
@@ -139,7 +146,7 @@ export default memo(function TransactionForm({ onSaveTransaction }) {
             // value={amount}
             // onChange={(e) => setAmount(e.target.value)}
             defaultValue={0}
-            {...register('amount',{valueAsNumber: true})}
+            {...register('amount', validationRules.amount)}
           />
         </div>
         <div className='clearfix'>
