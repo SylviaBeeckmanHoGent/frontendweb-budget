@@ -20,7 +20,7 @@ export default function TransactionList() {
       };
       setTransactions((currentTransactions) => [...currentTransactions, transaction]);
     },
-    [transactions]
+    []
   );
 
   // //transacties filteren
@@ -31,12 +31,11 @@ export default function TransactionList() {
 
   //useMemo verwacht 2 argumenten: een functie en een array van dependencies
   //het eerste argument functie moet iets teruggeven
-  const filteredtransactions = useMemo(() => {
+  const filteredTransaction = useMemo(() =>
     transactions.filter((transactie) => {
       console.log('filtering...');
       return transactie.place.toLowerCase().includes(search.toLowerCase());
-    })
-  },
+    }),
     [search, transactions] //als de search of de transacties veranderen, dan moeten we opnieuw filteren
   );
 
@@ -62,9 +61,9 @@ export default function TransactionList() {
         </button>
       </div>
 
-      {/* {filteredtransactions.map((trans, index) => (
+      {filteredTransaction.map((trans, index) => (
         <Transaction {...trans} key={index} />
-      ))} */}
+      ))}
 
       <TransactionForm onSaveTransaction={handleSaveTransaction} />
     </>
