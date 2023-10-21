@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import StarRating from './StarRating';
 
-const Place = ({ id, name, rating, onRate, onDelete }) => {
+const Place = memo(({ id, name, rating, onRate, onDelete }) => {
   const handleRate = (newRating) => {
     onRate(id, newRating);
   };
@@ -19,6 +20,6 @@ const Place = ({ id, name, rating, onRate, onDelete }) => {
       </div>
     </div>
   );
-};
+});
 
 export default Place;
