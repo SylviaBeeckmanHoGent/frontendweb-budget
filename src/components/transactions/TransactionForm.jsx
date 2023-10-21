@@ -1,6 +1,6 @@
 import { useState, memo } from 'react';
 import { PLACE_DATA } from '../../api/mock_data';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 
 //onderstaand is een pure functie > geeft altijd dezelfde output voor dezelfde input; heeft niks nodig die van ergens anders komt
 const toDateInputString = (date) => {
@@ -24,6 +24,66 @@ const validationRules = {
   },
   date: { valueAsDate: true },
   amount: { valueAsNumber: true },
+};
+
+function LabelInput(
+  label,
+  name,
+  type,
+  validationRules,
+  ...rest //de rest kan ik hieraan meegeven
+) {
+
+  const { errors, register } = useFormContext(); //geeft ons toegang tot de context van het formulier
+
+  return (
+    <div className='mb-3'>
+      <label htmlFor={name} className='form-label'>
+        {label}
+      </label>
+      <input
+        id={name}
+        type={type}
+        className='form-control'
+        {...register(name, validationRules)} //register vangt de onChange en de value op; validationRules is een object en kan dus nooit wijzigen > dus nooit problemen
+        {...rest} //de rest kan via de spread operator meegegeven worden aan de input + getoond worden dan
+      />
+      {name in errors ? ( //staat name in errors? Ja, dan onderstaande doen
+        <p className='form-text text-danger'>
+          {errors[name].message}
+        </p>)
+        : null} {/* anders niks doen */}
+    </div>
+  );
+}
+
+function PlacesSelect() {
+  const { register } = useFormContext();
+
+  return (
+    <div className='mb-3'>
+      <label htmlFor='places' className='form-label'>
+        Place
+      </label>
+      <select
+        id='places'
+        className='form-select'
+        required
+        // value={place}
+        // onChange={(e) => setPlace(e.target.value)}
+        defaultValue='home'
+        {...register('place')}
+      >
+        <option defaultChecked value=''>
+          -- Select a place --
+        </option>
+        {PLACE_DATA.map(({ id, name }) => (
+          <option key={id} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </div>)
 };
 
 export default memo(function TransactionForm({ onSaveTransaction }) {
@@ -75,88 +135,48 @@ export default memo(function TransactionForm({ onSaveTransaction }) {
   return (
     <>
       <h2>Add transaction</h2>
-      {/* handleSubmit verzamelt alle waarden en geeft die (data) door aan de eigen functie onSubmit */}
-      <form onSubmit={handleSubmit(onSubmit)} className='w-50 mb-3'>
-        <div className='mb-3'>
-          <label htmlFor='date' className='form-label'>
-            Who
-          </label>
-          <input
-            id='user'
+      {/* De FormProvider kan eender welke prop meekrijgen (maakt niet uit wat) en geeft deze dan door aan zijn kindcomponenten */}
+      <FormProvider errors={errors} register={register}>
+        {/* handleSubmit verzamelt alle waarden en geeft die (data) door aan de eigen functie onSubmit */}
+        <form onSubmit={handleSubmit(onSubmit)} className='w-50 mb-3'>
+          <LabelInput
+            label='Who'
+            name='user'
             type='text'
-            className='form-control'
-            placeholder='user'
-            // required //verplicht veld
-            //onderstaande nodig voor het koppelen van het veldje (hier input) aan de statevariabele (hier user
-            // value={user} //de waarde moet gelijk zijn aan de statevariabele
-            // onChange={(e) => setUser(e.target.value)} //als er iets wijzigt, roepen we de setter aan > target (hier input) wordt ingesteld met de ingetypte waarde
-            defaultValue=''
-            {...register('user', validationRules.user)} //register vangt de onChange en de value op; validationRules is een object en kan dus nooit wijzigen > dus nooit problemen
+            placeholder='user' //komt mee via de rest operator
+            defaultValue='' //komt mee via de rest operator
+            validationRules={validationRules.user}
           />
-          {errors.user && <p className='form-text text-danger'>{errors.user.message}</p>}
-        </div>
-        <div className='mb-3'>
-          <label htmlFor='date' className='form-label'>
-            Date
 
-          </label>
-          <input
-            id='date'
+          <LabelInput
+            label='Date'
+            name='date'
             type='date'
-            className='form-control'
             placeholder='date'
-            // value={toDateInputString(date)}
-            // onChange={(e) => setDate(new Date(e.target.value))} // e.target.value is een string, maar we willen een Date object > dus new Date()
             defaultValue={toDateInputString(new Date())}
-            {...register('date', validationRules.date)}
+            validationRules={validationRules.date}
           />
-        </div>
-        <div className='mb-3'>
-          <label htmlFor='places' className='form-label'>
-            Place
-          </label>
-          <select
-            id='places'
-            className='form-select'
-            required
-            // value={place}
-            // onChange={(e) => setPlace(e.target.value)}
-            defaultValue='home'
-            {...register('place')}
-          >
-            <option defaultChecked value=''>
-              -- Select a place --
-            </option>
-            {PLACE_DATA.map(({ id, name }) => (
-              <option key={id} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className='mb-3'>
-          <label htmlFor='amount' className='form-label'>
-            Amount
-          </label>
-          <input
-            id='amount'
+
+          <PlacesSelect />
+
+          <LabelInput
+            label='Amount'
+            name='amount'
             type='number'
-            className='form-control'
-            required
-            // value={amount}
-            // onChange={(e) => setAmount(e.target.value)}
+            placeholder='amount'
             defaultValue={0}
-            {...register('amount', validationRules.amount)}
+            validationRules={validationRules.amount}
           />
-        </div>
-        <div className='clearfix'>
-          <div className='btn-group float-end'>
-            <button type='submit' className='btn btn-primary'>
-              Add transaction
-            </button>
+
+          <div className='clearfix'>
+            <div className='btn-group float-end'>
+              <button type='submit' className='btn btn-primary'>
+                Add transaction
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </FormProvider>
     </>
   );
 });
