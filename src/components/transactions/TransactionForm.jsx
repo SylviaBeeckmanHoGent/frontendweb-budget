@@ -1,24 +1,29 @@
+//een React-formuliercomponent genaamd TransactionForm die wordt gebruikt voor het toevoegen en bewerken van transacties. 
+
+// Importeer React-hooks en -componenten
 import { useCallback, useEffect } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { useNavigate } from 'react-router-dom';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
-import { save } from '../../api';
+import { save } from '../../api'; // Importeer de save-functie vanuit een API-bestand
 import Error from '../Error';
 
+// Hulpmethode om een datumobject om te zetten naar een indeling die compatibel is met het input-type 'date'
 const toDateInputString = (date) => {
-  // ISO String without the trailing 'Z' is fine 🙄
+    // ISO String without the trailing 'Z' is fine 🙄
   // (toISOString returns something like 2020-12-05T14:15:74Z,
   // datetime-local HTML5 input elements expect 2020-12-05T14:15:74, without the (timezone) Z)
   //
   // the best thing about standards is that we have so many to chose from!
   if (!date) return null;
-  if (typeof date !== Object) {
+  if (typeof date !== 'object') {
     date = new Date(date);
   }
   let asString = date.toISOString();
   return asString.substring(0, asString.indexOf('T'));
 };
 
+// Validatieregels voor het formulier
 const validationRules = {
   user: {
     required: 'User is required',
@@ -34,6 +39,7 @@ const validationRules = {
   },
 };
 
+// Functionele component voor het invoerveld met label
 function LabelInput({ label, name, type, validationRules, ...rest }) {
   const {
     register,
@@ -63,6 +69,7 @@ function LabelInput({ label, name, type, validationRules, ...rest }) {
   );
 }
 
+// Functionele component voor het selectieveld met plaatsen
 function PlacesSelect({ name, places, ...rest }) {
   const {
     register,
@@ -94,15 +101,16 @@ function PlacesSelect({ name, places, ...rest }) {
   );
 }
 
+// Hoofdcomponent TransactionForm
 export default function TransactionForm({
-  places,
-  transaction,
+  places, // Lijst van beschikbare plaatsen voor de selectie
+  transaction, // Optionele transactiegegevens voor bewerking
 }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Haal de navigate-functie op uit react-router-dom
   const {
-    trigger: saveTransaction,
+    trigger: saveTransaction, // Gebruik SWR om de save-functie te muteren
     error: saveError,
-  } = useSWRMutation('transactions', save);
+  } = useSWRMutation('transactions', save); // 'transactions' is de key voor de cache, en save is de save-functie
 
   const {
     register,
@@ -111,8 +119,9 @@ export default function TransactionForm({
     setValue,
     formState: { errors },
     isSubmitting,
-  } = useForm();
+  } = useForm(); // Gebruik react-hook-form voor het beheren van formuliergegevens
 
+  // Callbackfunctie bij het indienen van het formulier
   const onSubmit = useCallback(async (data) => {
     const { user, place, amount, date } = data;
     await saveTransaction({
@@ -122,37 +131,42 @@ export default function TransactionForm({
       date,
       id: transaction?.id,
     });
-    navigate('/transactions');
+    navigate('/transactions'); // Navigeer naar de transactiepagina na het opslaan
   }, [saveTransaction, navigate, transaction?.id]);
 
+  // Effect dat wordt uitgevoerd wanneer de transactie-props veranderen
   useEffect(() => {
     if (
-      // check on non-empty object
+      // Controleer op een niet-leeg object
       transaction &&
       (Object.keys(transaction).length !== 0 ||
-          transaction.constructor !== Object)
+        transaction.constructor !== Object)
     ) {
+      // Zet de transactiegegevens om naar het juiste formaat voor het formulier
       const dateAsString = toDateInputString(new Date(transaction.date));
       setValue("date", dateAsString);
       setValue("user", transaction.user.id);
       setValue("place", transaction.place.id);
       setValue("amount", transaction.amount);
     } else {
-      reset();
+      reset(); // Reset het formulier als er geen transactie is
     }
   }, [transaction, setValue, reset]);
 
+  // Render het formulier met invoervelden en knoppen
   return (
     <>
       <h2>Add transaction</h2>
       <Error error={saveError} />
 
+      {/* FormProvider om formulierfuncties en -statussen te delen met ingebedde componenten */}
       <FormProvider
         handleSubmit={handleSubmit}
         errors={errors}
         register={register}
         isSubmitting={isSubmitting}
       >
+        {/* Het eigenlijke formulier met LabelInput- en PlacesSelect-componenten */}
         <form onSubmit={handleSubmit(onSubmit)} className='mb-5'>
           <LabelInput
             label='User ID'
@@ -199,3 +213,8 @@ export default function TransactionForm({
     </>
   );
 }
+
+
+{/* De TransactionForm-component beheert een formulier voor het toevoegen en bewerken van transacties. 
+      Het maakt gebruik van SWR voor de save-mutatie, react-hook-form voor het beheer van formuliergegevens en 
+      bevat verschillende subcomponenten voor specifieke invoervelden. */}
