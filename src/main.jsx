@@ -21,7 +21,7 @@ const router = createBrowserRouter([
         path: '/transactions',
         children: [
           {
-            index: true,
+            index: true, // /transactions
             element: <TransactionList />,
           },
           {

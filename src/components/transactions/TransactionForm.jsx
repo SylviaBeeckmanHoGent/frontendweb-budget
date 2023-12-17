@@ -107,6 +107,7 @@ export default function TransactionForm({
   transaction, // Optionele transactiegegevens voor bewerking
 }) {
   const navigate = useNavigate(); // Haal de navigate-functie op uit react-router-dom
+
   const {
     trigger: saveTransaction, // Gebruik SWR om de save-functie te muteren
     error: saveError,
@@ -131,7 +132,7 @@ export default function TransactionForm({
       date,
       id: transaction?.id,
     });
-    navigate('/transactions'); // Navigeer naar de transactiepagina na het opslaan
+    navigate('/transactions', { replace: true }); // Navigeer naar de transactiepagina na het opslaan + door replace kunnen we niet terugkeren naar het formulier
   }, [saveTransaction, navigate, transaction?.id]);
 
   // Effect dat wordt uitgevoerd wanneer de transactie-props veranderen
@@ -145,7 +146,7 @@ export default function TransactionForm({
       // Zet de transactiegegevens om naar het juiste formaat voor het formulier
       const dateAsString = toDateInputString(new Date(transaction.date));
       setValue("date", dateAsString);
-      setValue("user", transaction.user.id);
+      setValue("user", transaction.user.id); //wordt dan ingevuld in de form
       setValue("place", transaction.place.id);
       setValue("amount", transaction.amount);
     } else {

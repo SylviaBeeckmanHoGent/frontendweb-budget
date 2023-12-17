@@ -6,8 +6,8 @@ export default function Error({ error }) {
       <div className="alert alert-danger" data-cy="axios_error_message">
         <h4 className="alert-heading">Oops, something went wrong</h4>
         <p>
-          {error.response.data?.message || error.message}
-          {error.response.data?.details && (
+          {error.response?.data?.message || error.message}
+          {error.response?.data?.details && (
             <>
               :
               <br />

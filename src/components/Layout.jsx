@@ -1,3 +1,4 @@
+//dit is de Root component
 import { Outlet } from 'react-router-dom';
 import { useThemeColors } from '../contexts/Theme.context';
 import Navbar from './Navbar';

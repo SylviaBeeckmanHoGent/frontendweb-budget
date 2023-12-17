@@ -39,7 +39,7 @@ export default function AddOrEditTransaction() {
         {/* Render de TransactionForm-component met opgehaalde plaatsen en transactiegegevens */}
         <TransactionForm
           places={places}
-          transaction={transaction}
+          transaction={transaction} //kan zowel de currentTransaction zijn als de nieuwe
         />
       </AsyncData>
     </>
