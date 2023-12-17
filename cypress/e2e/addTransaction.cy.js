@@ -10,9 +10,9 @@ describe('Add transaction', () => {
     cy.get("[data-cy=submit_transaction]").click();
 
     cy.get("[data-cy=transaction_user]").eq(9).contains("Pieter");
-    cy.get("[data-cy=transaction_amount]").each((el, idx) => {
-      if (idx === 9) {
-        expect(Number(el[0].textContent.replace(/^\D+/g, '').replace(/,/, '.'))).to.equal(200);
+    cy.get("[data-cy=transaction_amount]").each((element, index) => {
+      if (index === 9) {
+        expect(Number(element[0].textContent.replace(/^\D+/g, '').replace(/,/, '.'))).to.equal(200);
       }
     });
     cy.get("[data-cy=transaction]").should("have.length", 10);
@@ -20,8 +20,8 @@ describe('Add transaction', () => {
 
   it("should remove the transaction", () => {
     cy.visit("http://localhost:5173/transactions/");
-    cy.get("[data-cy=transaction_remove_btn]").eq(9).click();
-    cy.get("[data-cy=transaction]").should("have.length", 9);
+    cy.get("[data-cy=transaction_remove_btn]").eq(9).click(); // 9 = index
+    cy.get("[data-cy=transaction]").should("have.length", 9); // 9 = aantal transacties
   });
 
   it("should show the error message for an invalid user id", () => {
