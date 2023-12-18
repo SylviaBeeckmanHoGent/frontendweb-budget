@@ -7,7 +7,11 @@ import TransactionList from './pages/transactions/TransactionList';
 import AddOrEditTransaction from './pages/transactions/AddOrEditTransaction';
 import PlacesList from './pages/places/PlacesList';
 import { ThemeProvider } from './contexts/Theme.context';
+import { AuthProvider } from './contexts/Auth.context';
+import Login from './pages/Login';
+import Logout from './pages/Logout';
 import './index.css';
+import PrivateRoute from './components/PrivateRoute';
 
 const router = createBrowserRouter([
   {
@@ -18,7 +22,16 @@ const router = createBrowserRouter([
         element: <Navigate replace to="/transactions" />,
       },
       {
+        path:'/login',
+        element: <Login />,
+      },
+      {
+        path:'/logout',
+        element: <Logout />,
+      },
+      {
         path: '/transactions',
+        element: <PrivateRoute />,
         children: [
           {
             index: true, // /transactions
@@ -36,6 +49,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/places',
+        element: <PrivateRoute />,
         children: [
           {
             index: true,
@@ -48,14 +62,16 @@ const router = createBrowserRouter([
         element: <NotFound />,
       },
     ],
-  },
+  },  
 ]);
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </AuthProvider>
   </React.StrictMode>,
 );

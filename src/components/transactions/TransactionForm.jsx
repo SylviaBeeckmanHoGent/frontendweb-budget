@@ -7,10 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { save } from '../../api'; // Importeer de save-functie vanuit een API-bestand
 import Error from '../Error';
+import LabelInput from '../LabelInput';
 
 // Hulpmethode om een datumobject om te zetten naar een indeling die compatibel is met het input-type 'date'
 const toDateInputString = (date) => {
-    // ISO String without the trailing 'Z' is fine 🙄
+  // ISO String without the trailing 'Z' is fine 🙄
   // (toISOString returns something like 2020-12-05T14:15:74Z,
   // datetime-local HTML5 input elements expect 2020-12-05T14:15:74, without the (timezone) Z)
   //
@@ -39,35 +40,6 @@ const validationRules = {
   },
 };
 
-// Functionele component voor het invoerveld met label
-function LabelInput({ label, name, type, validationRules, ...rest }) {
-  const {
-    register,
-    errors,
-    isSubmitting,
-  } = useFormContext();
-
-  const hasError = name in errors;
-
-  return (
-    <div className='mb-3'>
-      <label htmlFor={name} className='form-label'>
-        {label}
-      </label>
-      <input
-        {...register(name, validationRules)}
-        id={name}
-        type={type}
-        disabled={isSubmitting}
-        className='form-control'
-        {...rest}
-      />
-      {hasError ? (
-        <div className='form-text text-danger' data-cy="label_input_error">{errors[name].message}</div>
-      ) : null}
-    </div>
-  );
-}
 
 // Functionele component voor het selectieveld met plaatsen
 function PlacesSelect({ name, places, ...rest }) {
@@ -113,14 +85,16 @@ export default function TransactionForm({
     error: saveError,
   } = useSWRMutation('transactions', save); // 'transactions' is de key voor de cache, en save is de save-functie
 
+  //als je je credentials meegeeft als default values, dan zijn ze altijd ingevuld
+  //enkel voor lokaal gebruik zo doen!!!
+  const methods = useForm(); // Gebruik react-hook-form voor het beheren van formuliergegevens
+
   const {
-    register,
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
     isSubmitting,
-  } = useForm(); // Gebruik react-hook-form voor het beheren van formuliergegevens
+  } = methods;
 
   // Callbackfunctie bij het indienen van het formulier
   const onSubmit = useCallback(async (data) => {
@@ -161,12 +135,7 @@ export default function TransactionForm({
       <Error error={saveError} />
 
       {/* FormProvider om formulierfuncties en -statussen te delen met ingebedde componenten */}
-      <FormProvider
-        handleSubmit={handleSubmit}
-        errors={errors}
-        register={register}
-        isSubmitting={isSubmitting}
-      >
+      <FormProvider {...methods}>
         {/* Het eigenlijke formulier met LabelInput- en PlacesSelect-componenten */}
         <form onSubmit={handleSubmit(onSubmit)} className='mb-5'>
           <LabelInput
